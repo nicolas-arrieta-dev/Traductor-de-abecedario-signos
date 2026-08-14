@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ASL Recognition</title>
+    <style>
+        body { font-family: Arial; text-align: center; margin-top: 50px; }
+        button { padding: 10px 20px; background: #4285F4; color: white; border: none; cursor: pointer; }
+        #results { margin-top: 20px; }
+        #liveView { margin: 20px auto; width: 640px; height: 480px; border: 2px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Reconocimiento de Lenguaje de Señas</h1>
+    
+    <!-- Opción 1: Subir imagen -->
+    <div>
+        <h2>Procesar imagen</h2>
+        <input type="file" id="fileInput" accept="image/*">
+        <button onclick="processImage()">Procesar</button>
+        <div id="imageResults">
+            <h3>Resultado: <span id="predLetter"></span></h3>
+            <div style="display: flex; justify-content: center; gap: 20px;">
+                <div>
+                    <h4>Original</h4>
+                    <img id="originalImg" style="max-width: 300px;">
+                </div>
+                <div>
+                    <h4>Procesada</h4>
+                    <img id="processedImg" style="max-width: 300px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Opción 2: Usar cámara -->
+    <div style="margin-top: 50px;">
+        <h2>Usar cámara en vivo</h2>
+        <button id="startCamera">Iniciar Cámara</button>
+        <div id="liveView"></div>
+        <p id="livePrediction" style="font-size: 24px; font-weight: bold;"></p>
+    </div>
+
+    <script>
+        // Procesar imagen subida
+        async function processImage() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/process_image', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            document.getElementById('predLetter').textContent = data.letter;
+            document.getElementById('originalImg').src = `/static/uploads/${data.original}`;
+            document.getElementById('processedImg').src = `/static/uploads/${data.processed}`;
+        }
+
+        // Cámara en vivo (simplificado)
+        document.getElementById('startCamera').addEventListener('click', () => {
+            document.getElementById('liveView').innerHTML = 
+                `<img src="/video_feed" style="width: 100%; height: 100%;">`;
+        });
+    </script>
+</body>
+</html>
